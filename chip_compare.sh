@@ -79,6 +79,9 @@ rawcount_quantile_cutoff=${rawcount_quantile_cutoff:=0.02}
 odir=${odir:="."}
 session=${session:="http://localhost:60151/goto?"}
 
+# this needs to exist
+mkdir -p $odir
+
 # print set parameters
 >&2 echo "-s (sampleTable)=$sampleTable"
 >&2 echo "-c (conditions_colname)=$conditions_colname"
@@ -102,7 +105,7 @@ echo "running Rmarkdown ..."
 Rscript -e "rmarkdown::render(
 
 	input='/groups/gaidt/bioinf/software/scripts/deseq_pw/chip_compare.Rmd',
-	output_file='chip_compare.html',
+	output_file='$odir/chip_compare.html',
 
 	params=list(
 
