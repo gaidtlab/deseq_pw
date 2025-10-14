@@ -93,7 +93,8 @@ blacklist: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/hg38-b
 threads: 4
 
 and launch:
->> count_beds.sh <<
+
+count_beds.sh
 
 results of this example are in /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/ :
 
@@ -149,7 +150,7 @@ sample_id	sample_name						count_column							condition
 3			sgAAVS1_DMSO_R1_exp1			sgAAVS1_DMSO_R1_featureCount			exp1
 4			sgAAVS1_DMSO_R2_exp1			sgAAVS1_DMSO_R2_featureCount			exp1
 
->> chip_compare.sh -h <<
+chip_compare.sh -h
 
 Usage: chip_compare.sh options
 
@@ -169,9 +170,9 @@ Usage: chip_compare.sh options
 -i (session): RStudio session URL [http://localhost:60151/goto?]
 -h: Show this help message
 
-# ./chip_compare.sh -s samples_experiment.txt -c condition -l exp1 -e exp2 -t /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.txt -a /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.annot.txt -o /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/doc
+# chip_compare.sh -s samples_experiment.txt -c condition -l exp1 -e exp2 -t /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.txt -a /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.annot.txt -o /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/doc
 
-./chip_compare.sh -s samples_experiment.txt -c condition -l exp1 -e exp2 \
+chip_compare.sh -s samples_experiment.txt -c condition -l exp1 -e exp2 \
 	-t /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.txt \
 	-a /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.annot.txt \
 	-o /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/doc \
