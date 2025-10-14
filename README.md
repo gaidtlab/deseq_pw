@@ -15,7 +15,7 @@ Prerequisite:
 export PATH=$PATH:/groups/gaidt/bioinf/software/scripts/deseq_pw
 ```
 
-# (1) prepare (stage) the data
+# (1) Prepare (stage) the data
 
 We need to achieve the following directory structure, optimally somewhere on scratch-cbe:
 
@@ -130,7 +130,7 @@ results of this example are in /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/202
 
 ```
 
-# (3) copy the results to the group drive
+# (3) Copy the results to the group drive
 
 ```
 # rsync -auvrn --exclude "*.bam" [results_dir]/* [target_dir_on_group_drive]/
