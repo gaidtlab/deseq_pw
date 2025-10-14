@@ -11,8 +11,10 @@
 3. rsync                             # copy results back to group drive using rsync
 4. samples_experiment.txt and chip_compare.sh # will run chip_compare.Rmd and performs DESEq2 analysis
 
+export PATH=$PATH:/groups/gaidt/bioinf/software/scripts/deseq_pw
+
 #
-# prepare (stage) the data
+# (1) prepare (stage) the data
 # 
 
 We need to achieve the following directory structure, optimally somewhere on scratch-cbe:
@@ -33,9 +35,9 @@ data/hg38-blacklist.v2.bed
 data/QC.20250415a.bed
 
 # example (edit according to your needs:) bash script:
->> count_beds_setup.sh <<
+count_beds_setup.sh
 
-results of this example are in /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/ :
+results of this example are in /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/ :
 
 cat ./data/bam_samples.txt :
 
@@ -74,26 +76,26 @@ sgAAVS1_DMSO_R2_peaks
 ./data/bigwig/MORC3-V5_DMSO-M3AID_REP2.mLb.clN.bigWig
 
 #
-# count the reads
+# (2) count the reads
 #
 
 # edit pathes in this script according to your needs:
 
 cat count_beds.yaml:
 
-bed_indir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/data/bed"
-bam_indir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/data/bam"
-outdir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/results"
-bed_samples: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/data/bed_samples.txt"
-bam_samples: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/data/bam_samples.txt"
+bed_indir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/bed"
+bam_indir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/bam"
+outdir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/results"
+bed_samples: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/bed_samples.txt"
+bam_samples: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/bam_samples.txt"
 bam_ext: ".mLb.clN.sorted.bam"
-blacklist: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/data/hg38-blacklist.v2.bed"
+blacklist: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/hg38-blacklist.v2.bed"
 threads: 4
 
 and launch:
 >> count_beds.sh <<
 
-results of this example are in /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/ :
+results of this example are in /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/ :
 
 ./results/merged_bed/merged.bed
 ./results/merged_bed/merged.benchmark.txt
@@ -126,11 +128,11 @@ results of this example are in /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/202
 # rsync -auvrn --exclude "*.bam" [results_dir]/* [target_dir_on_group_drive]/
 
 # dry run:
-#rsync -auvrn --exclude "*.bam" /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/* /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14/
+#rsync -auvrn --exclude "*.bam" /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/* /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14/
 rsync -auvrn --exclude "*.bam" /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/* /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/
 
 # execute
-rsync -auvr --exclude "*.bam" /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct13/* /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14/
+rsync -auvr --exclude "*.bam" /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/* /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14/
 rsync -auvr --exclude "*.bam" /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/* /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/
 
 #
@@ -170,9 +172,9 @@ Usage: chip_compare.sh options
 # ./chip_compare.sh -s samples_experiment.txt -c condition -l exp1 -e exp2 -t /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.txt -a /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.annot.txt -o /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/doc
 
 ./chip_compare.sh -s samples_experiment.txt -c condition -l exp1 -e exp2 \
-	-t /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct13/results/featureCount_concat/featureCount_counts.txt \
-	-a /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct13/results/featureCount_concat/featureCount_counts.annot.txt \
-	-o /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct13/doc \
+	-t /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.txt \
+	-a /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.annot.txt \
+	-o /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/doc \
 	-p 1000 -m 0 -r 0.02
 
 
