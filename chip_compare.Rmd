@@ -124,9 +124,8 @@ print(paste("downsample_pairs: ",params$downsample_pairs))
 print(paste("downsample_ma: ",params$downsample_ma))
 print(paste("rawcount_quantile_cutoff: ",params$rawcount_quantile_cutoff))
 print(paste("igv_pad: ",params$igv_pad))
+print(paste("odir: ",params$odir))
 
-# DEBUG
-# params <- list(celltype="BLaER1")
 ```
 
 # Main results
@@ -137,6 +136,11 @@ print(paste("igv_pad: ",params$igv_pad))
 # Input
 
 ```{r input}
+#
+# output dir
+#
+dir.create(params$odir,recursive = TRUE, showWarnings = FALSE)
+
 #
 # count table
 #
