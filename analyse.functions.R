@@ -1,19 +1,19 @@
 write_extended_results_table <- function(deobj=NULL,vst=NULL,res=NULL,ofile=NULL,genelength=NULL) {
   
-  print(length(genelength))
+  #print(length(genelength))
   
   raw.counts <- counts(deobj)
   raw.counts.means <- add_condition_mean_sds(counts=raw.counts,count.type="raw")
-  print(dim(raw.counts))
+  #print(dim(raw.counts))
   
   norm.counts <- counts(deobj,normalized=T)
   norm.counts.means <- add_condition_mean_sds(counts=norm.counts,count.type="norm")
-  print(dim(norm.counts))
+  #print(dim(norm.counts))
   
   vst.counts <- assay(vst)
   colnames(vst.counts) <- colnames(vst.counts) %>% str_remove("_[ATGC].*")
   vst.counts.means <- add_condition_mean_sds(counts=vst.counts,count.type="vst")
-  print(dim(vst.counts))
+  #print(dim(vst.counts))
   
   tpm.counts <- convertCounts(countsMatrix = counts(deobj), unit="TPM",geneLength=genelength)
   tpm.counts.means <- add_condition_mean_sds(counts=tpm.counts,count.type="tpm")
