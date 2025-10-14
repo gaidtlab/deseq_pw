@@ -1,0 +1,8 @@
+bed_indir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/bed"
+bam_indir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/bam"
+outdir: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/results"
+bed_samples: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/bed_samples.txt"
+bam_samples: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/bam_samples.txt"
+bam_ext: ".mLb.clN.sorted.bam"
+blacklist: "/scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/data/hg38-blacklist.v2.bed"
+threads: 4

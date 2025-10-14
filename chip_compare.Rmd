@@ -1,0 +1,549 @@
+---
+title: "DESeq2 differential analysis"
+author: "M Jaritz"
+date: "`r Sys.Date()`"
+output:
+  html_document: 
+    number_sections: yes
+    toc: yes
+    toc_depth: 4
+    toc_float: yes
+    collapsed: no
+    fig_height: 4
+    fig_width: 12
+    code_folding: hide
+params:
+  sampleTable: "MISSING"
+  conditions_colname: "MISSING"
+  control_condition: "MISSING"
+  experiment_condition: "MISSING"
+  countTable: "MISSING"
+  countTableAnnot: "MISSING"
+  odir: "MISSING"
+  downsample_pairs: 1000
+  downsample_ma: 1000
+  session: "MISSING"
+  rawcount_quantile_cutoff: 0.02
+  igv_pad: 10000
+---
+
+
+```{r knitr, include=FALSE}
+# R 4.3.2
+knitr::opts_chunk$set(echo = T, message=F, warning=F, error=F, 
+                      comment=NA, cache=F, R.options=list(width=220), 
+                      fig.align='center', out.width='75%', fig.asp=.75,
+                      fig.show = "asis", fig.keep= "all", include=T)
+```
+
+```{r libs}
+
+#remotes::install_github("thomasp85/patchwork")
+#remotes::install_github("tidyverse/ggplot2", ref = remotes::github_pull("5592"))
+#library(optparse)
+#library(readr) tidyverse
+#library(stringr) tidyverse
+
+# R 4.3.2
+
+#if (!require("BiocManager", quietly = TRUE))
+#  install.packages("BiocManager")
+
+library(tidyverse)
+library(GGally)
+library(ggrepel)
+
+library(DESeq2)
+library(edgeR)      # cpm
+library(vsn)        # meanSdplot
+library(ReportingTools)  # HTMLReport
+library(ape)
+library(ShortRead)
+library(apeglm)
+library(EDASeq)  # plotRLE
+
+library(mixOmics)
+library(matrixStats)
+
+library(RColorBrewer)
+library(viridis)
+library(patchwork)
+library(ggpointdensity)
+library(data.table)
+library(DT)
+library(htmlTable)
+
+library(DGEobj.utils)
+
+source("/users/jaritz/Gaidt/bioinf/software/scripts/deseq2.plot.R")
+source("/users/jaritz/Gaidt/bioinf/software/scripts/multiple_matrix_DESeq2.functions.R")  # mPCA
+source("/users/jaritz/Gaidt/bioinf/software/scripts/analyse.functions.R")  # write_extended_results_table
+```
+
+```{r debug, eval=F}
+workdate <- "2025Oct14b"
+workdir <-  paste0("/groups/gaidt/user/markus.jaritz/projects/Markus/",workdate,"/")
+
+dir.create(paste0(workdir,"/results"),recursive = T,showWarnings = F)
+setwd(paste0(workdir,"/results"))
+getwd()
+
+odir <- getwd()
+
+params=list(
+  sampleTable='/users/jaritz/Gaidt/bioinf/software/scripts/samples_experiment.txt',
+  conditions_colname='condition',
+  control_condition='exp1',
+  experiment_condition='exp2',
+  countTableAnnot='/groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.annot.txt',
+  countTable='/groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.txt',
+  odir=odir,
+  downsample_pairs=1000,
+  downsample_ma=0,
+  session="http://localhost:60151/goto?",
+  rawcount_quantile_cutoff=0.02,
+  igv_pad=10000
+)
+params
+p_ <- GGally::print_if_interactive
+set.seed(42)
+
+```
+
+```{r settings }
+p_ <- GGally::print_if_interactive
+set.seed(42)
+
+print(paste("sampleTable: ",params$sampleTable))
+print(paste("conditions_colname: ",params$conditions_colname))
+print(paste("control_condition: ",params$control_condition))
+print(paste("experiment_condition: ",params$experiment_condition))
+print(paste("countTable: ",params$countTable))
+print(paste("countTableAnnot: ",params$countTableAnnot))
+print(paste("downsample_pairs: ",params$downsample_pairs))
+print(paste("downsample_ma: ",params$downsample_ma))
+print(paste("rawcount_quantile_cutoff: ",params$rawcount_quantile_cutoff))
+print(paste("igv_pad: ",params$igv_pad))
+
+# DEBUG
+# params <- list(celltype="BLaER1")
+```
+
+# Main results
+
+* [condition.0.txt](./condition.0.txt)
+* [condition.0.top100.html](./condition.0.top100.html)
+
+# Input
+
+```{r input}
+#
+# count table
+#
+t <- read_delim(params$countTable,delim="\t",col_names = T,skip = 0)
+print("Input countTable dimension:")
+print(dim(t))
+#t[1:3,1:3]
+
+#
+# sample meta info
+#
+print("Input sampleTable:")
+m <- read_delim(params$sampleTable,delim="\t",col_names = T)
+#m
+
+datatable(m)
+
+#
+# annotation data
+#
+print("Input countTable annotation (top 3 lines):")
+countTableAnnot <- read_delim(params$countTableAnnot,delim="\t",col_names = T)
+colnames(countTableAnnot)[1] <- "SiteID"
+countTableAnnot[1:3,]
+```
+
+```{r prepare_deseq2}
+print("Setting up DESeq2 input count table ...")
+# counts only (remove rownames)
+tc <- t[,-1]
+#print(dim(tc))
+
+# setup DESeqDataSet
+tcm <- as.matrix(tc)
+tcm[1:3,1:3]
+counts <- matrix(tcm,
+                 ncol=dim(tcm)[2],
+                 dimnames=list(t$sites,colnames(tcm)))
+#print("Final deseq2 count table:")
+#print(dim(counts))
+#counts[1:3,]
+```
+
+
+# DESeq2
+
+## Preparing DESeq2 object
+
+```{r deseq2_setup}
+DDS <- DESeqDataSetFromMatrix(countData = counts, 
+                             colData = m,
+                             design = ~condition)
+print(colData(DDS))
+rowData(DDS) <- countTableAnnot
+head(rowData(DDS))
+#print(dim(DDS))
+```
+
+
+## Relative fold changes and PCA
+
+
+The *Relative Log Expression (RLE) plot* is a useful diagnostic plot to visualize the differences between the distributions of read counts across samples.
+
+It shows the boxplots of the log-ratios of the site-level read counts of each sample to those of a reference sample (defined as the median across the samples). Ideally, the distributions should be centered around the zero line and as tight as possible. Clear deviations indicate the need for normalization and/or the presence of outlying samples. 
+
+The PCA plot represents a *Principal Component Analysis (PCA) plot* of the raw counts in object .
+
+```{r rle_raw,eval=T}
+#
+# count check
+#
+par(las=2,mar=c(10,2,2,2))
+plotRLE(counts(DDS))
+plotPCA(counts(DDS))
+
+#
+# count distribution
+#
+
+# all counts of all samples together
+raw_count_cuttoff <- 0
+
+as_tibble(counts(DDS)) %>% 
+  pivot_longer(cols=everything(),names_to = "samples", values_to = "counts") %>%
+  ggplot(aes(x=log2(counts+1))) +
+  geom_histogram(bins=100) +
+  geom_vline(xintercept = log2(raw_count_cuttoff),col="red") +
+  theme_light() +
+  ggtitle(paste("Raw count distributions (all sites), cutoff=",raw_count_cuttoff))
+
+raw_count_cuttoff <- quantile(counts(DDS),params$rawcount_quantile_cutoff)
+
+as_tibble(counts(DDS)) %>% 
+  pivot_longer(cols=everything(),names_to = "samples", values_to = "counts") %>%
+  ggplot(aes(x=log2(counts+1))) +
+  geom_histogram(bins=100) +
+  geom_vline(xintercept = log2(raw_count_cuttoff),col="red") +
+  theme_light() +
+  ggtitle(paste0("Raw count distributions (all sites), cutoff ",params$rawcount_quantile_cutoff,"% =",raw_count_cuttoff))
+
+# by sample
+as_tibble(counts(DDS)) %>% 
+  pivot_longer(cols=everything(),names_to = "samples", values_to = "counts") %>%
+  ggplot(aes(x=log2(counts+1))) +
+  geom_histogram(bins=100) +
+  geom_vline(xintercept = log2(raw_count_cuttoff),col="red") +
+  facet_wrap(~samples) +
+  theme_light() +
+  ggtitle(paste("Raw count distributions (all sites), cutoff=",raw_count_cuttoff))
+
+# rowsums
+rs <- tibble(raw_count_sums_per_peak=rowSums(counts(DDS)))
+rs %>% ggplot(aes(x=log2(raw_count_sums_per_peak+1))) + 
+  geom_histogram(bins=100) +
+  theme_light() +
+  ggtitle("Raw count rowsums (over all replicates, per site)")
+
+#
+# filter a bit for very low numbers
+#
+print("low counts filtered out (smallest group size=2):")
+smallestGroupSize <- 2
+keep <- rowSums(counts(DDS) > (2*raw_count_cuttoff)) >= smallestGroupSize
+print(table(keep))
+DDS <- DDS[keep,]
+#dim(DDS)
+plotRLE(counts(DDS))
+plotPCA(counts(DDS))
+
+sections=c(10,50,100,500,1000,2000,5000)
+plot_counts(counts(DDS),sections,region="Peak")
+
+```
+
+
+## RLOG transform (VST)
+
+
+```{r deseq2_rlog}
+#
+# get rlogs
+#
+
+if(file.exists(paste0(params$odir,"/vst.RData"))) {
+  print(paste0("loading ",params$odir,"/vst.RData"))
+  load(paste0(params$odir,"/vst.RData"))
+} else {
+  print("calculating VST ...")
+  vst <- rlog(DDS, blind=T)
+  #print(dim(DDS))
+  #print(dim(vst))
+  save(vst,file=paste0(params$odir,"/vst.RData"))
+}
+```
+
+
+### PCA
+
+
+We investigate the relationship between mean and variance, and its effect on the PCA.
+
+![condition.var.png](./condition.var.png)
+
+```{r pca_run, eval=T}
+mPCA(m=assay(vst),
+  colgroups=m$condition,
+  collegend="Condition",
+  pchgroups=as.character(m$sample_id),
+  pchlegend="Replicate",
+  #annot=rowData(vst)[,1],
+  title="vst.blind",
+  ofile=paste0(params$odir,"/condition"),
+  varCutoff = 0.9,
+  show_biplot=F)
+```
+
+
+## Pairwise scatters RAW & VST {.tabset}
+
+
+```{r deseq2_pairwise_scatters_raw, eval=T}
+#
+# plot for each celltype
+#
+
+# subsample, for quicker drawing
+if(params$downsample_pairs>0) {
+  si <- sample(c(1:dim(DDS)[1]),params$downsample_pairs)
+  #print(head(si))
+  DDS.sub <- DDS[si,]
+} else {
+  DDS.sub <- DDS
+  si <- c(1:dim(DDS)[1])
+}
+  
+# plot raw counts
+p <- ggpairs(data.frame(log2(counts(DDS.sub)+1)),
+      lower=list(continuous=my_fn)) +
+  ggtitle(paste0("Raw counts subsample: ",params$downsample_pairs)) +
+  theme_bw()
+#p_(p)
+print(p)
+ggsave(p,filename=paste0(params$odir,"/raw.ss_",params$downsample_pairs,".jpeg")) 
+  
+# plot vst counts
+vst.sub <- vst[si,]
+p <- ggpairs(data.frame(assay(vst.sub)),
+      lower=list(continuous=my_fn)) +
+ggtitle(paste0("RLOG transformed counts, subsample: ",params$downsample_pairs)) +
+  theme_bw()
+#p_(p)
+print(p)
+ggsave(p,filename=paste0(params$odir,"/vst.ss_",params$downsample_pairs,".jpeg")) 
+```
+
+
+## Pairwise scatters TPM {.tabset}
+
+
+```{r deseq2_pairwise_scatters_tpm, eval=T}
+#
+# plot for each celltype
+#
+
+# subsample, for quicker drawing
+
+# we take the same subsamples as above
+if(params$downsample_pairs>0) {
+  #si <- sample(c(1:dim(DDS)[1]),params$downsample_pairs)
+  #print(head(si))
+  DDS.sub <- DDS[si,]
+} else {
+  DDS.sub <- DDS
+  si <- c(1:dim(DDS)[1])
+}
+
+# plot TPMs
+rd <- rowData(DDS.sub)
+sitelengths <- rd$End-rd$Start
+tpm.counts <- convertCounts(countsMatrix = counts(DDS.sub),unit="TPM",geneLength=sitelengths)
+
+p <- ggpairs(data.frame(log2(tpm.counts+1)),
+      lower=list(continuous=my_fn)) +
+  ggtitle(paste0("TPMs, subsample: ",params$downsample_pairs)) +
+  theme_bw()
+#p_(p)
+print(p)
+ggsave(p,filename=paste0(params$odir,"/tpm.ss_",params$downsample_pairs,".jpeg")) 
+  
+```
+
+
+## Dispersion and normalized counts
+
+
+plotDispEsts plots the per-gene dispersion estimates together with the fitted mean-dispersion relationship. 
+
+```{r deseq2_model,eval=T}
+#
+# ---- DESeq2 model ----
+#
+#if(file.exists(paste0(params$odir,"/deobj.",params$celltype,",RData"))) {
+#  print(paste0("loading ",params$odir,"/deobj.",params$celltype,".RData"))
+#  load(paste0(params$odir,"/deobj.",params$celltype,".RData"))
+#} else {
+  print("calculating DESeq2 object ...")
+  deobj <- DESeq(DDS, test='Wald')
+  save(deobj,file=paste0(params$odir,"/deobj.RData"))
+#}
+
+print("DESeq2 sizeFactors:")
+p <- tibble("names"=names(sizeFactors(deobj)),
+     "sf"=sizeFactors(deobj)) %>%
+ ggplot(aes(x=names,y=sf)) +
+ geom_col() +
+ coord_flip() +
+ theme_light() +
+ #theme(axis.text.x=element_text(angle=90)) +
+ ggtitle("Size factors")
+print(p)
+ggsave(p,filename=paste0(params$odir,"/sizefactors.jpeg")) 
+# 
+print("Dispersion estimates:")
+plotDispEsts(deobj)
+res <- results(deobj)
+```
+
+
+## Relative fold change and PCA - normalized
+
+
+```{r rle_norm, eval=T}
+par(las=2,mar=c(10,2,2,2))
+plotRLE(counts(deobj,normalized=T))
+plotPCA(counts(deobj,normalized=T))
+```
+
+
+## Pairwise scatters NORM {.tabset}
+
+
+```{r deseq2_pairwise_scatters_norm, results='asis', eval=T}
+#
+# ---- DESeq2 plots ----
+#
+
+# ---- norm counts ----
+cts.norm <- counts(deobj,normalized=T)
+
+# same si as above
+if(params$downsample_pairs>0) {
+  cts.norm.sub <- cts.norm[si,]
+} else {
+  cts.norm.sub <- cts.norm
+}
+# summary(is.na(cts.norm)) # there should be no NA
+p <- ggpairs(log2(cts.norm.sub+1),
+      lower=list(continuous=my_fn),
+      xlab="log2(norm(counts+1))",
+      ylab="log2(norm(counts+1))") +
+  ggtitle(paste0("Normalized counts, subsample=",params$downsample_pairs)) +
+  theme_bw()
+#p_(p)
+print(p)
+ggsave(p,filename=paste0(params$odir,"/norm.ss_",params$downsample_pairs,".jpeg")) 
+  
+```
+
+
+## MA and volcano plots {.tabset}
+
+[condition.0.txt](./condition.0.txt)
+
+```{r test}
+if(params$downsample_ma>0) {
+  si <- sample(c(1:dim(deobj)[1]),params$downsample_ma)
+  deobj.sub <- deobj[si,]
+  vst.sub <- vst[si,]
+} else {
+  si <- c(1:dim(deobj)[1])
+  deobj.sub <- deobj
+  vst.sub <- vst
+}
+
+res <- results(deobj.sub,contrast = c("condition",params$experiment_condition,params$control_condition))
+res.df <- results(deobj.sub,contrast = c("condition",params$experiment_condition,params$control_condition),tidy=T)
+
+#dim(res.df)
+#res.df[1:3,1:3]
+#res.df[1:3,]
+
+#data.frame(rowData(deobj.sub))
+row.df <- data.frame(rowData(deobj.sub)[1:19])
+row.df <- cbind(row=rownames(row.df),row.df)
+#row.df[1:3,1:3]
+
+res.df.a <- merge(x=row.df,y=res.df,by="row",sort=T,all=T)
+#res.df.a[1:3,]
+#dim(res.df.a)
+
+#dim(vst.sub)
+#dim(counts(deobj.sub))
+write_extended_results_table(deobj=deobj.sub,
+                              vst=vst.sub,
+                              res=res.df.a,
+                              ofile=paste0(params$odir,"/condition.",params$downsample_ma,".txt"),
+                             genelength = res.df.a$End-res.df.a$Start)
+
+```
+
+```{r maplots}
+#
+# MA plots
+#
+#res
+print("MA-plot with padj <= 0.01:")
+p <- my_ma(padj_co=0.01,deobj=res)
+print(p)
+
+p1 <- my_ma(padj_co=0.01,deobj=NULL,df=data.frame(res),baseMean_co=0, color=T,
+            filter_df_na = T, name="condition",
+            outfile=paste0(params$odir,"/ma.",params$downsample_ma,".jpeg"))
+print(p1)
+```
+
+```{r volcano2}
+p2 <- my_volcano(df=data.frame(res),baseMean_co = 0,filter_df_na = T, 
+                 color=T, name="condition", 
+                 outfile=paste0(params$odir,"/vc.",params$downsample_ma,".jpeg"))
+print(p2)
+
+# top results table with links
+html.df <- coords_to_igv_links(df = res.df.a %>% arrange(pvalue) %>% slice_head(n=100),
+                                chr="Chr",start="Start",end="End",session=params$session,pad=params$igv_pad) # params$session)
+html.table <- html.df %>% 
+  addHtmlTableStyle(align = "r") %>%
+  htmlTable(caption=paste("Top 100 entries, sorted by pvalue, pad=",params$igv_pad),
+            useViewer=FALSE,rnames=FALSE)
+write(html.table,file = paste0(params$odir,"/condition.",params$downsample_ma,".top100.html"))
+
+```
+
+[condition.0.top100.html](./condition.0.top100.html)
+
+# Session info
+
+```{r session_info}
+sessionInfo()
+```

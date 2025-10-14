@@ -1,0 +1,5 @@
+sample_id	sample_name	count_column	condition
+1	MORC3_V5_DMSO-M3AID_REP1_exp2	MORC3-V5_DMSO-M3AID_REP1_featureCount	exp2
+2	MORC3_V5_DMSO-M3AID_REP2_exp2	MORC3-V5_DMSO-M3AID_REP2_featureCount	exp2
+3	sgAAVS1_DMSO_R1_exp1	sgAAVS1_DMSO_R1_featureCount	exp1
+4	sgAAVS1_DMSO_R2_exp1	sgAAVS1_DMSO_R2_featureCount	exp1
