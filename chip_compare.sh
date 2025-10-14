@@ -101,7 +101,7 @@ echo "loading modules done."
 echo "running Rmarkdown ..."
 Rscript -e "rmarkdown::render(
 
-	input='/groups/gaidt/bioinf/software/scripts/chip_compare.Rmd',
+	input='/groups/gaidt/bioinf/software/scripts/deseq_pw/chip_compare.Rmd',
 	output_file='chip_compare.html',
 
 	params=list(
