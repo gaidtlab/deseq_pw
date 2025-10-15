@@ -32,7 +32,11 @@ add_condition_mean_sds <- function(counts=NULL,count.type=NULL) {
   
   # remove replicate info
   cn <- colnames(counts) %>% 
-    str_remove_all("_[123]$")
+    str_remove_all("_[123]$") %>%
+    str_remove_all("_REP[_123]$") %>%
+    str_remove_all("_R[_123]$") %>%
+    str_remove_all("_REP[123$]") %>%
+    str_remove_all("_R[123]$")
 
   counts.t <- as_tibble(counts)
   #condition <- unique(cn)[1]
