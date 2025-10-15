@@ -181,7 +181,7 @@ Usage: chip_compare.sh options
 ```
 
 ```
-chip_compare.sh -s samples_experiment.txt -c condition -l exp1 -e exp2 -t /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.txt -a /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.annot.txt -o /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/doc
+chip_compare.sh -s /groups/gaidt/bioinf/software/scripts/deseq_pw/samples_experiment.txt -c condition -l exp1 -e exp2 -t /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.txt -a /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/results/featureCount_concat/featureCount_counts.annot.txt -o /groups/gaidt/user/markus.jaritz/projects/Markus/2025Oct14b/doc
 ```
 # (5) Explore results
 
