@@ -37,7 +37,20 @@ and the blacklist file and all VNTRs (for viewing in IGV lateron):
 ## Example (edit according to your needs:) bash script:
 
 ```
-count_beds_setup.sh
+count_beds.sh -h
+Usage: ./count_beds.sh [options]
+Options:
+  -c, --config FILE     Specify the configuration file in YAML format (default: count_beds.yaml)
+  -a, --smk_args ARGS   Additional snakemake arguments (default: ''),  --dry-run, --forceall, etc.
+  -p, --processes N     Number of processes/cores to use (default: 4)
+  -l, --local           Run locally without cluster support
+  -h, --help            Show this help message and exit
+```
+
+```
+count_beds_setup.sh -c count_beds.yaml -a --dry-run -p 4 -l # local, but dry run (not executed, just steps are shown)
+count_beds_setup.sh -c count_beds.yaml -a --dry-run         # cluster, but dry run (not executed, just steps are shown)
+count_beds_setup.sh -c count_beds.yaml                      # cluster, executed
 ```
 
 results of this example are in /scratch-cbe/users/markus.jaritz/Gaidt/Moritz/2025Oct14b/ :
