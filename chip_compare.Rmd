@@ -91,7 +91,7 @@ getwd()
 odir <- getwd()
 
 params=list(
-  sampleTable='/users/jaritz/Gaidt/bioinf/software/scripts/samples_experiment.txt',
+  sampleTable='/users/jaritz/Gaidt/bioinf/software/scripts/deseq_pw/samples_experiment.txt',
   conditions_colname='condition',
   control_condition='exp1',
   experiment_condition='exp2',
