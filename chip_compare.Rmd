@@ -457,16 +457,23 @@ if(params$downsample_pairs>0) {
 } else {
   cts.norm.sub <- cts.norm
 }
+
+save(cts.norm.sub,file=paste0(params$odir,"/norm_counts.RData"))
+
 # summary(is.na(cts.norm)) # there should be no NA
-p <- ggpairs(log2(cts.norm.sub+1),
+plotr <- try(
+  p <- ggpairs(log2(cts.norm.sub+1),
       lower=list(continuous=my_fn),
       xlab="log2(norm(counts+1))",
       ylab="log2(norm(counts+1))") +
   ggtitle(paste0("Normalized counts, subsample=",params$downsample_pairs)) +
   theme_bw()
-#p_(p)
-print(p)
-ggsave(p,filename=paste0(params$odir,"/norm.ss_",params$downsample_pairs,".jpeg")) 
+)
+if(class(plotr)[1] != "try-error") {
+  #p_(p)
+  print(p)
+  ggsave(p,filename=paste0(params$odir,"/norm.ss_",params$downsample_pairs,".jpeg")) 
+}
   
 ```
 
