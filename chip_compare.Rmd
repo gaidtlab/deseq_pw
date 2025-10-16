@@ -75,9 +75,9 @@ library(htmlTable)
 
 library(DGEobj.utils)
 
-source("/users/jaritz/Gaidt/bioinf/software/scripts/deseq_pw/deseq2.plot.R")
-source("/users/jaritz/Gaidt/bioinf/software/scripts/deseq_pw/multiple_matrix_DESeq2.functions.R")  # mPCA
-source("/users/jaritz/Gaidt/bioinf/software/scripts/deseq_pw/analyse.functions.R")  # write_extended_results_table
+source("/groups/gaidt/bioinf/software/scripts/deseq_pw/deseq2.plot.R")
+source("/groups/gaidt/bioinf/software/scripts/deseq_pw/multiple_matrix_DESeq2.functions.R")  # mPCA
+source("/groups/gaidt/bioinf/software/scripts/deseq_pw/analyse.functions.R")  # write_extended_results_table
 ```
 
 ```{r debug, eval=F}
