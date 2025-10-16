@@ -12,7 +12,13 @@
 Prerequisite:
 
 ```
+ssh -X cbe.vbc.ac.at
+srun -n 1 --mem=20g --time=8:00:00 --reservation=interactive --pty bash
 export PATH=$PATH:/groups/gaidt/bioinf/software/scripts/deseq_pw
+
+# Maybe some R libraries need to be installed.
+# The easiest ist to start RStudio (version 4.3.2, https://jupyterhub.vbc.ac.at/)
+# and install apeglm, EDASeq, DGEobj.utils (all BioConductor).
 ```
 
 # (1) Prepare (stage) the data
