@@ -94,6 +94,7 @@ mkdir -p $odir
 >&2 echo "-m (downsample_ma)=$downsample_ma"
 >&2 echo "-i (session)=$session"
 >&2 echo "-r (rawcount_quantile_cutoff)=$rawcount_quantile_cutoff"
+>&2 echo "install_dir=$install_dir"
 
 echo "loading modules ..."
 module load build-env/f2022
@@ -102,7 +103,7 @@ module load pandoc/2.18
 echo "loading modules done."
 
 echo "running Rmarkdown ..."
-Rscript -e "options(bitmapType=‘cairo’); rmarkdown::render(
+Rscript -e "options(bitmapType='cairo'); rmarkdown::render(
 
 	input='$install_dir/chip_compare.Rmd',
 	output_file='$odir/chip_compare.html',
