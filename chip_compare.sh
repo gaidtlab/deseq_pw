@@ -105,7 +105,7 @@ echo "loading modules done."
 echo "running Rmarkdown ..."
 Rscript -e "options(bitmapType='cairo'); rmarkdown::render(
 
-	input='$install_dir/chip_compare.Rmd',
+	input='$install_dir/renv/chip_compare.Rmd',
 	output_file='$odir/chip_compare.html',
 
 	params=list(
