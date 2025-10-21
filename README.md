@@ -12,16 +12,32 @@
 Prerequisite:
 
 ```
-ssh -X cbe.vbc.ac.at
+Try to run the installation already available:
+
+ssh cbe.vbc.ac.at
 srun -n 1 --mem=20g --time=8:00:00 --reservation=interactive --pty bash
 
 export PATH=$PATH:/groups/gaidt/bioinf/software/scripts/deseq_pw
 export DESEQ_PW_INSTALL_DIR="/groups/gaidt/bioinf/software/scripts/deseq_pw"
 
+Most probably there will be issues with R libraries, then you have to install the packages yourself or use renv as follows:
 
-# Maybe some R libraries need to be installed.
-# The easiest ist to start RStudio (version 4.3.2, https://jupyterhub.vbc.ac.at/)
-# and install apeglm, EDASeq, DGEobj.utils (all BioConductor).
+* mkdir [install-dir] # .e.g. in group or user drives
+* cd  [install-dir]
+* git clone -b master https://github.com/gaidtlab/deseq_pw.git
+
+* module load build-env/f2022
+* module load r-bundle-bioconductor/3.18-foss-2023a-r-4.3.2
+* module load pandoc/2.18
+
+* launch R
+* setwd([install-dir]/deseq_pw)
+* install.packages("renv") 
+* renv::restore() # follow the instructions (activate - relaunch - renv::restore). Proceed in case of system libraries you cannot install.
+
+* in a new terminal, interactive node, set the pathes accordingly:
+export DESEQ_PW_INSTALL_DIR="[install-dir]/deseq_pw"
+export PATH=$PATH:[install-dir]/deseq_pw"
 ```
 
 # (1) Prepare (stage) the data
