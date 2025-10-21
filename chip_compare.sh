@@ -102,7 +102,7 @@ module load pandoc/2.18
 echo "loading modules done."
 
 echo "running Rmarkdown ..."
-Rscript -e "rmarkdown::render(
+Rscript -e "options(bitmapType=‘cairo’); rmarkdown::render(
 
 	input='/groups/gaidt/bioinf/software/scripts/deseq_pw/chip_compare.Rmd',
 	output_file='$odir/chip_compare.html',
