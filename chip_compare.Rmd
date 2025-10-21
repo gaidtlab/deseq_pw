@@ -110,6 +110,36 @@ set.seed(42)
 
 ```
 
+```{r debug2, eval=F}
+workdate <- "2025Oct20"
+workdir <-  paste0("/groups/gaidt/user/markus.jaritz/projects/Markus/",workdate,"/")
+
+dir.create(paste0(workdir,"/results"),recursive = T,showWarnings = F)
+setwd(paste0(workdir,"/results"))
+getwd()
+
+odir <- getwd()
+
+params=list(
+  sampleTable='/groups/gaidt/user/luisa.krumwiede/01-BioInfo_Storage/DeSeq/ChIP_ATAC_pairwise/deseq_pw_PU1/samples_experiment.txt',
+  conditions_colname='condition',
+  control_condition='exp1',
+  experiment_condition='exp2',
+  countTableAnnot='/groups/gaidt/user/luisa.krumwiede/01-BioInfo_Storage/DeSeq/ChIP_ATAC_pairwise/deseq_pw_PU1/results/featureCount_concat/featureCount_counts.annot.txt',
+  countTable='/groups/gaidt/user/luisa.krumwiede/01-BioInfo_Storage/DeSeq/ChIP_ATAC_pairwise/deseq_pw_PU1/results/featureCount_concat/featureCount_counts.txt',
+  odir=odir,
+  downsample_pairs=1000,
+  downsample_ma=0,
+  session="http://localhost:60151/goto?",
+  rawcount_quantile_cutoff=0.02,
+  igv_pad=10000
+)
+params
+p_ <- GGally::print_if_interactive
+set.seed(42)
+
+```
+
 ```{r settings }
 p_ <- GGally::print_if_interactive
 set.seed(42)
@@ -268,12 +298,20 @@ keep <- rowSums(counts(DDS) > (2*raw_count_cuttoff)) >= smallestGroupSize
 print(table(keep))
 DDS <- DDS[keep,]
 #dim(DDS)
-plotRLE(counts(DDS))
-plotPCA(counts(DDS))
+
+plotre <- try(
+  plotRLE(counts(DDS))
+)
+
+plotre <- try(
+  plotPCA(counts(DDS))
+)
 
 sections=c(10,50,100,500,1000,2000,5000)
-plot_counts(counts(DDS),sections,region="Peak")
 
+plotre <- try(
+  plot_counts(counts(DDS),sections,region="Peak")
+)
 ```
 
 
