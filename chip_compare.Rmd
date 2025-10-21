@@ -75,7 +75,7 @@ library(htmlTable)
 
 library(DGEobj.utils)
 
-install_dir <- "/groups/gaidt/bioinf/software/scripts/deseq_pw"
+install_dir <- Sys.getenv("DESEQ_PW_INSTALL_DIR", unset = "/groups/gaidt/bioinf/software/scripts/deseq_pw")
 
 source(paste0(install_dir,"/deseq2.plot.R"))
 source(paste0(install_dir,"/multiple_matrix_DESeq2.functions.R"))  # mPCA

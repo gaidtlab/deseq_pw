@@ -43,8 +43,6 @@ function print_usage() {
 	exit 1
 }
 
-install_dir="/groups/gaidt/bioinf/software/scripts/deseq_pw"
-
 ######
 # MAIN
 ######
@@ -79,6 +77,7 @@ downsample_pairs=${downsample_pairs:=1000}
 rawcount_quantile_cutoff=${rawcount_quantile_cutoff:=0.02}
 odir=${odir:="."}
 session=${session:="http://localhost:60151/goto?"}
+install_dir=${DESEQ_PW_INSTALL_DIR:="/groups/gaidt/bioinf/software/scripts/deseq_pw"}
 
 # this needs to exist
 mkdir -p $odir
