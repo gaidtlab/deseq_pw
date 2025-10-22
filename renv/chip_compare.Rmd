@@ -46,6 +46,11 @@ knitr::opts_chunk$set(echo = T, message=F, warning=F, error=F,
 
 # R 4.3.2
 
+# library(renv)
+# renv::init()
+# renv::snapshot()
+
+
 #if (!require("BiocManager", quietly = TRUE))
 #  install.packages("BiocManager")
 print(.libPaths())
