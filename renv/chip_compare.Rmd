@@ -83,9 +83,9 @@ library(DGEobj.utils)
 
 install_dir <- Sys.getenv("DESEQ_PW_INSTALL_DIR", unset = "/groups/gaidt/bioinf/software/scripts/deseq_pw")
 
-source(paste0(install_dir,"/deseq2.plot.R"))
-source(paste0(install_dir,"/multiple_matrix_DESeq2.functions.R"))  # mPCA
-source(paste0(install_dir,"/analyse.functions.R"))  # write_extended_results_table
+source(paste0(install_dir,"/renv/deseq2.plot.R"))
+source(paste0(install_dir,"/renv/multiple_matrix_DESeq2.functions.R"))  # mPCA
+source(paste0(install_dir,"/renv/analyse.functions.R"))  # write_extended_results_table
 ```
 
 ```{r debug, eval=F}
